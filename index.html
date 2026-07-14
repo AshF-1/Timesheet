@@ -429,7 +429,7 @@
                             <label>Break</label>
                             <input type="text" class="break-input" placeholder="e.g. 30 mins" oninput="calculateTimesheet()">
                         </div>
-                        <div class="input-wrapper holiday-fulltime holiday-hidden" id="holiday-wrapper-${d}">
+                        <div class="input-wrapper holiday-fulltime" id="holiday-wrapper-${d}">
                             <label>Holiday</label>
                             <select class="holiday-fulltime-select" onchange="toggleHolidayFields('${d}'); calculateTimesheet()">
                                 <option value="">None</option>
@@ -482,6 +482,7 @@
             dateInput.value = targetSunday.toISOString().split('T')[0];
 
             loadFormData();
+            showHolidayForFulltime();
             calculateTimesheet();
         });
 
@@ -493,6 +494,17 @@
             totalMileage: 0,
             shifts: []
         };
+
+        function showHolidayForFulltime() {
+            daysOfWeek.forEach(d => {
+                const holidayWrapper = document.getElementById(`holiday-wrapper-${d}`);
+                if (currentEmploymentType === "fulltime") {
+                    holidayWrapper.classList.remove("holiday-hidden");
+                } else {
+                    holidayWrapper.classList.add("holiday-hidden");
+                }
+            });
+        }
 
         function toggleHolidayFields(day) {
             const row = document.querySelector(`.day-row[data-day="${day}"]`);
@@ -804,24 +816,24 @@
                     let vals;
                     if (currentEmploymentType === "fulltime") {
                         vals = [
-                            s.start || "-", 
-                            s.breakText || "-",
-                            s.finish || "-", 
-                            s.hotelLodge || "-", 
+                            s.start || "", 
+                            s.breakText || "",
+                            s.finish || "", 
+                            s.hotelLodge || "", 
                             formattedJobNum, 
-                            s.hrs || "-", 
-                            s.expVal ? "£" + s.expVal.toFixed(2) : "-"
+                            s.hrs || "", 
+                            s.expVal ? "£" + s.expVal.toFixed(2) : ""
                         ];
                     } else {
                         vals = [
-                            s.start || "-", 
-                            s.breakText || "-",
-                            s.finish || "-", 
-                            s.hotelLodge || "-", 
+                            s.start || "", 
+                            s.breakText || "",
+                            s.finish || "", 
+                            s.hotelLodge || "", 
                             formattedJobNum, 
-                            s.hrs || "-", 
-                            s.mileageVal || "-",
-                            s.expVal ? "£" + s.expVal.toFixed(2) : "-"
+                            s.hrs || "", 
+                            s.mileageVal || "",
+                            s.expVal ? "£" + s.expVal.toFixed(2) : ""
                         ];
                     }
                     
@@ -836,9 +848,10 @@
                     if (isHoliday) {
                         doc.setTextColor(...green);
                         doc.setFont("Helvetica", "bold");
-                        doc.setFontSize(7);
-                        const breakColX = 15 + colWidths[0] + colWidths[1];
-                        doc.text("Holiday", breakColX + colWidths[2]/2, y + 5.5, { align: "center" });
+                        doc.setFontSize(10);
+                        const breakColX = 15 + colWidths[0] + colWidths[1]/2;
+                        const breakColWidth = colWidths[1] + colWidths[2];
+                        doc.text("Holiday", breakColX + breakColWidth/2, y + 5, { align: "center" });
                         doc.setFontSize(8);
                         doc.setFont("Helvetica", "normal");
                     }
@@ -863,7 +876,7 @@
                     doc.rect(blankX, y, colWidths[5], 8);
                     blankX += colWidths[5];
                     doc.rect(blankX, y, colWidths[6], 8);
-                    doc.setTextColor(0, 0, 0);
+                    doc.setTextColor(...red);
                     doc.text(calculatedData.standDown.toFixed(1), blankX + colWidths[6]/2, y + 5, { align: "center" });
                     
                     blankX += colWidths[6];
@@ -881,15 +894,20 @@
                 doc.rect(15, y, 180, 8, "F");
                 doc.rect(15, y, 180, 8);
                 doc.setFont("Helvetica", "bold");
-                doc.text("TOTALS:", 110, y + 5);
+                doc.text("TOTALS:", 18, y + 5);
                 
                 if (currentEmploymentType === "fulltime") {
-                    doc.text(calculatedData.totalHours.toFixed(1) + " Hrs", 145, y + 5);
-                    doc.text("£" + calculatedData.totalExp.toFixed(2), 170, y + 5);
+                    const hrsX = 15 + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5];
+                    const expX = hrsX + colWidths[6];
+                    doc.text(calculatedData.totalHours.toFixed(1) + " Hrs", hrsX + colWidths[6]/2, y + 5, { align: "center" });
+                    doc.text("£" + calculatedData.totalExp.toFixed(2), expX + colWidths[7]/2, y + 5, { align: "center" });
                 } else {
-                    doc.text(calculatedData.totalWorked.toFixed(1) + " Hrs", 130, y + 5);
-                    doc.text(calculatedData.totalMileage.toFixed(1) + " mi", 155, y + 5);
-                    doc.text("£" + calculatedData.totalExp.toFixed(2), 175, y + 5);
+                    const hrsX = 15 + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] + colWidths[5];
+                    const mileX = hrsX + colWidths[6];
+                    const expX = mileX + colWidths[7];
+                    doc.text(calculatedData.totalWorked.toFixed(1) + " Hrs", hrsX + colWidths[6]/2, y + 5, { align: "center" });
+                    doc.text(calculatedData.totalMileage.toFixed(1) + " mi", mileX + colWidths[7]/2, y + 5, { align: "center" });
+                    doc.text("£" + calculatedData.totalExp.toFixed(2), expX + colWidths[8]/2, y + 5, { align: "center" });
                 }
 
                 y += 15;

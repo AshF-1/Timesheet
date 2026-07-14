@@ -433,7 +433,7 @@
                             <label>Holiday</label>
                             <select class="holiday-fulltime-select" onchange="toggleHolidayFields('${d}'); calculateTimesheet()">
                                 <option value="">None</option>
-                                <option value="H">Holiday (H)</option>
+                                <option value="H">Holiday</option>
                             </select>
                         </div>
                         <div class="input-wrapper">
@@ -713,6 +713,7 @@
                 const darkGrey = [68, 68, 68];
                 const lightGrey = [240, 240, 240];
                 const green = [46, 125, 50];
+                const greyOut = [200, 200, 200];
 
                 // Header
                 doc.setFont("Helvetica", "bold");
@@ -759,8 +760,8 @@
 
                 let headers, colWidths;
                 if (currentEmploymentType === "fulltime") {
-                    headers = ["Day", "Start", "Breaks", "Holiday", "Finish", "Hotel/Lodge", "Job No.", "Hrs Worked", "Exp (£)"];
-                    colWidths = [20, 16, 14, 16, 16, 18, 28, 22, 26];
+                    headers = ["Day", "Start", "Breaks", "Finish", "Hotel/Lodge", "Job No.", "Hrs Worked", "Exp (£)"];
+                    colWidths = [20, 16, 14, 16, 18, 28, 22, 26];
                 } else {
                     headers = ["Day", "Start", "Breaks", "Finish", "Hotel/Lodge", "Job No.", "Hrs Worked", "Miles", "Exp (£)"];
                     colWidths = [22, 16, 14, 16, 18, 28, 22, 18, 26];
@@ -782,6 +783,14 @@
                 // Table Rows
                 y += 7;
                 calculatedData.shifts.forEach((s) => {
+                    // Check if holiday - grey out entire row
+                    const isHoliday = s.holiday === "H";
+                    
+                    if (isHoliday) {
+                        doc.setFillColor(...greyOut);
+                        doc.rect(15, y, 180, 8, "F");
+                    }
+                    
                     doc.setFont("Helvetica", "bold");
                     doc.setTextColor(0, 0, 0);
                     doc.rect(15, y, colWidths[0], 8);
@@ -797,7 +806,6 @@
                         vals = [
                             s.start || "-", 
                             s.breakText || "-",
-                            s.holiday === "H" ? "H" : "-",
                             s.finish || "-", 
                             s.hotelLodge || "-", 
                             formattedJobNum, 
@@ -819,18 +827,21 @@
                     
                     vals.forEach((v, idx) => {
                         doc.rect(curX, y, colWidths[idx+1], 8);
-                        
-                        // Holiday column in green for full-time
-                        if (currentEmploymentType === "fulltime" && idx === 2 && v === "H") {
-                            doc.setTextColor(...green);
-                        } else {
-                            doc.setTextColor(0, 0, 0);
-                        }
-                        
-                        doc.text(v.toString(), curX + colWidths[idx+1]/2, y + 5, { align: "center" });
                         doc.setTextColor(0, 0, 0);
+                        doc.text(v.toString(), curX + colWidths[idx+1]/2, y + 5, { align: "center" });
                         curX += colWidths[idx+1];
                     });
+
+                    // Add "Holiday" text in green under Break column if holiday is selected
+                    if (isHoliday) {
+                        doc.setTextColor(...green);
+                        doc.setFont("Helvetica", "bold");
+                        doc.setFontSize(7);
+                        const breakColX = 15 + colWidths[0] + colWidths[1];
+                        doc.text("Holiday", breakColX + colWidths[2]/2, y + 5.5, { align: "center" });
+                        doc.setFontSize(8);
+                        doc.setFont("Helvetica", "normal");
+                    }
 
                     doc.rect(200, y, 20, 8); doc.rect(220, y, 20, 8); doc.rect(240, y, 20, 8); doc.rect(260, y, 20, 8);
 
@@ -845,11 +856,14 @@
                     doc.text("Stand Down", 17, y + 5);
                     
                     let blankX = 15 + colWidths[0];
-                    for (let i = 1; i < 6; i++) {
+                    for (let i = 1; i < 5; i++) {
                         doc.rect(blankX, y, colWidths[i], 8);
                         blankX += colWidths[i];
                     }
+                    doc.rect(blankX, y, colWidths[5], 8);
+                    blankX += colWidths[5];
                     doc.rect(blankX, y, colWidths[6], 8);
+                    doc.setTextColor(0, 0, 0);
                     doc.text(calculatedData.standDown.toFixed(1), blankX + colWidths[6]/2, y + 5, { align: "center" });
                     
                     blankX += colWidths[6];

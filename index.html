@@ -714,10 +714,6 @@
                 const lightGrey = [240, 240, 240];
                 const green = [46, 125, 50];
 
-                // Page dimensions
-                const pageWidth = doc.internal.pageSize.getWidth();
-                const pageHeight = doc.internal.pageSize.getHeight();
-
                 // Header
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(22);
@@ -736,42 +732,41 @@
                     "Readypower Rail Services LTD",
                     "Winnersh, Reading",
                     "Email: Payroll@readypower.com"
-                ], pageWidth - 15, 13, { align: "right" });
+                ], 280, 13, { align: "right" });
 
                 doc.setDrawColor(...red);
                 doc.setLineWidth(1);
-                doc.line(15, 26, pageWidth - 15, 26);
+                doc.line(15, 26, 280, 26);
 
                 // Meta
                 doc.setFillColor(...lightGrey);
-                doc.rect(15, 29, pageWidth - 30, 12, "F");
+                doc.rect(15, 29, 265, 12, "F");
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(9);
                 doc.setTextColor(...darkGrey);
                 const nameLabel = currentEmploymentType === "fulltime" ? "DRIVER'S NAME: " : "CONTRACTOR NAME: ";
                 doc.text(nameLabel + personName, 18, 36);
-                doc.text("WEEK ENDING: " + formattedDate, pageWidth - 18, 36, { align: "right" });
+                doc.text("WEEK ENDING: " + formattedDate, 277, 36, { align: "right" });
 
                 // Table Headers
                 let y = 46;
                 doc.setFillColor(220, 220, 220);
                 doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.2);
+
                 doc.setFontSize(8);
                 doc.setTextColor(0, 0, 0);
 
                 let headers, colWidths;
                 if (currentEmploymentType === "fulltime") {
                     headers = ["Day", "Start", "Breaks", "Holiday", "Finish", "Hotel/Lodge", "Job No.", "Hrs Worked", "Exp (£)"];
-                    colWidths = [18, 15, 13, 14, 15, 16, 24, 18, 20];
+                    colWidths = [20, 16, 14, 16, 16, 18, 28, 22, 26];
                 } else {
                     headers = ["Day", "Start", "Breaks", "Finish", "Hotel/Lodge", "Job No.", "Hrs Worked", "Miles", "Exp (£)"];
-                    colWidths = [20, 15, 13, 15, 16, 24, 18, 16, 18];
+                    colWidths = [22, 16, 14, 16, 18, 28, 22, 18, 26];
                 }
                 
-                const tableWidth = colWidths.reduce((a, b) => a + b, 0);
-                
-                doc.rect(15, y, tableWidth, 7, "F");
+                doc.rect(15, y, 180, 7, "F");
                 let currentX = 15;
                 headers.forEach((h, i) => {
                     doc.rect(currentX, y, colWidths[i], 7);
@@ -779,11 +774,10 @@
                     currentX += colWidths[i];
                 });
 
-                let payrollX = currentX + 2;
-                const payrollWidth = pageWidth - payrollX - 15;
+                let payrollX = 200;
                 doc.setFillColor(235, 235, 235);
-                doc.rect(payrollX, y, payrollWidth, 7, "F");
-                doc.text("FOR PAYROLL ONLY", payrollX + payrollWidth/2, y + 5, { align: "center" });
+                doc.rect(payrollX, y, 80, 7, "F");
+                doc.text("FOR PAYROLL ONLY", payrollX + 40, y + 5, { align: "center" });
 
                 // Table Rows
                 y += 7;
@@ -791,7 +785,7 @@
                     doc.setFont("Helvetica", "bold");
                     doc.setTextColor(0, 0, 0);
                     doc.rect(15, y, colWidths[0], 8);
-                    doc.text(s.day, 15 + colWidths[0]/2, y + 5, { align: "center" });
+                    doc.text(s.day, 17, y + 5);
 
                     doc.setFont("Helvetica", "normal");
                     let curX = 15 + colWidths[0];
@@ -838,11 +832,7 @@
                         curX += colWidths[idx+1];
                     });
 
-                    // Payroll boxes
-                    doc.rect(payrollX, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + payrollWidth/4, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + payrollWidth/2, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + (3*payrollWidth/4), y, payrollWidth/4, 8);
+                    doc.rect(200, y, 20, 8); doc.rect(220, y, 20, 8); doc.rect(240, y, 20, 8); doc.rect(260, y, 20, 8);
 
                     y += 8;
                 });
@@ -852,7 +842,7 @@
                     doc.setFont("Helvetica", "bolditalic");
                     doc.setTextColor(...red); 
                     doc.rect(15, y, colWidths[0], 8);
-                    doc.text("Stand Down", 15 + colWidths[0]/2, y + 5, { align: "center" });
+                    doc.text("Stand Down", 17, y + 5);
                     
                     let blankX = 15 + colWidths[0];
                     for (let i = 1; i < 6; i++) {
@@ -860,17 +850,13 @@
                         blankX += colWidths[i];
                     }
                     doc.rect(blankX, y, colWidths[6], 8);
-                    doc.setTextColor(0, 0, 0);
                     doc.text(calculatedData.standDown.toFixed(1), blankX + colWidths[6]/2, y + 5, { align: "center" });
                     
                     blankX += colWidths[6];
-                    doc.rect(blankX, y, colWidths[7], 8);
+                    doc.rect(blankX, y, colWidths[7], 8); 
                     
                     doc.setDrawColor(200, 200, 200);
-                    doc.rect(payrollX, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + payrollWidth/4, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + payrollWidth/2, y, payrollWidth/4, 8);
-                    doc.rect(payrollX + (3*payrollWidth/4), y, payrollWidth/4, 8);
+                    doc.rect(200, y, 20, 8); doc.rect(220, y, 20, 8); doc.rect(240, y, 20, 8); doc.rect(260, y, 20, 8);
 
                     y += 8;
                 }
@@ -878,23 +864,25 @@
                 // Totals Row
                 doc.setTextColor(0, 0, 0);
                 doc.setFillColor(235, 240, 245);
-                doc.rect(15, y, tableWidth, 8, "F");
-                doc.rect(15, y, tableWidth, 8);
+                doc.rect(15, y, 180, 8, "F");
+                doc.rect(15, y, 180, 8);
                 doc.setFont("Helvetica", "bold");
+                doc.text("TOTALS:", 110, y + 5);
                 
-                let totalsText;
                 if (currentEmploymentType === "fulltime") {
-                    totalsText = `TOTALS: ${calculatedData.totalHours.toFixed(1)} Hrs | £${calculatedData.totalExp.toFixed(2)}`;
+                    doc.text(calculatedData.totalHours.toFixed(1) + " Hrs", 145, y + 5);
+                    doc.text("£" + calculatedData.totalExp.toFixed(2), 170, y + 5);
                 } else {
-                    totalsText = `TOTALS: ${calculatedData.totalWorked.toFixed(1)} Hrs | ${calculatedData.totalMileage.toFixed(1)} mi | £${calculatedData.totalExp.toFixed(2)}`;
+                    doc.text(calculatedData.totalWorked.toFixed(1) + " Hrs", 130, y + 5);
+                    doc.text(calculatedData.totalMileage.toFixed(1) + " mi", 155, y + 5);
+                    doc.text("£" + calculatedData.totalExp.toFixed(2), 175, y + 5);
                 }
-                doc.text(totalsText, 15 + tableWidth/2, y + 5, { align: "center" });
 
                 y += 15;
 
                 // Footer notes and signatures
                 doc.setDrawColor(200, 200, 200);
-                doc.rect(15, y, (pageWidth - 30) / 2 - 5, 25);
+                doc.rect(15, y, 120, 25);
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(8);
                 doc.text("NOTES & ALLOWANCES:", 18, y + 5);
@@ -926,19 +914,17 @@
                 doc.text(notesList.slice(0, 3).join(", "), 18, y + 12);
 
                 // Signatures
-                const sigX = 15 + (pageWidth - 30) / 2 + 5;
-                const sigWidth = (pageWidth - 30) / 2 - 5;
-                doc.rect(sigX, y, sigWidth, 25);
+                doc.rect(145, y, 135, 25);
                 doc.setFont("Helvetica", "bold");
                 doc.setFontSize(8);
-                doc.text("MANAGER'S SIGNATURE:", sigX + 5, y + 6);
-                doc.line(sigX + 5, y + 20, sigX + sigWidth - 5, y + 20);
+                doc.text("MANAGER'S SIGNATURE:", 150, y + 6);
+                doc.line(150, y + 20, 200, y + 20);
 
-                doc.text("DRIVER'S SIGNATURE (Signed Digitally):", sigX + 5, y + 6);
+                doc.text("DRIVER'S SIGNATURE (Signed Digitally):", 210, y + 6);
                 doc.setFont("Courier", "bolditalic");
                 doc.setFontSize(12);
                 doc.setTextColor(26, 35, 126);
-                doc.text(personName, sigX + 5, y + 16);
+                doc.text(personName, 210, y + 16);
 
                 // Document code data lines
                 doc.setTextColor(150, 150, 150);
@@ -946,8 +932,8 @@
                 doc.setFontSize(7);
                 const docCode = currentEmploymentType === "fulltime" ? "FM-F-04 Drivers Time Sheet" : "FM-F-05 Contractor Timesheet";
                 doc.text(docCode, 15, y + 33);
-                doc.text("Issue 2", pageWidth / 2, y + 33, { align: "center" });
-                doc.text("October 2020", pageWidth - 15, y + 33, { align: "right" });
+                doc.text("Issue 2", 145, y + 33, { align: "center" });
+                doc.text("October 2020", 280, y + 33, { align: "right" });
 
                 // Add Receipts Pages - one receipt per page with clear numbering
                 let hasReceipts = false;
@@ -999,18 +985,17 @@
                                 imageFormat = 'WEBP';
                             }
 
-                            // Center the receipt image on the page
-                            const imgWidth = 80;
-                            const imgHeight = 100;
-                            const centerX = (pageWidth - imgWidth) / 2;
-                            const centerY = 50;
+                            // Center the receipt image on the page - scaled down for readability
+                            const imgWidth = 100;
+                            const imgHeight = 130;
+                            const pageWidth = doc.internal.pageSize.getWidth();
+                            const startX = (pageWidth - imgWidth) / 2;
+                            const startY = 50;
 
-                            doc.addImage(dataUrl, imageFormat, centerX, centerY, imgWidth, imgHeight);
+                            doc.addImage(dataUrl, imageFormat, startX, startY, imgWidth, imgHeight);
                         } catch (e) {
                             console.error("Error adding receipt image:", e);
                             doc.setTextColor(255, 0, 0);
-                            doc.setFont("Helvetica", "normal");
-                            doc.setFontSize(12);
                             doc.text("Error loading receipt image", 15, 100);
                         }
                     });
